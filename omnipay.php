@@ -69,11 +69,9 @@ function omnipay_civicrm_managed(&$entities) {
   return _omnipay_civix_civicrm_managed($entities);
 }
 class nz_co_fuzion_omnipay extends CRM_Core_Payment {
-  const
-  CHARSET = 'iso-8859-1';
-  static protected $_mode = null;
-
-  static protected $_params = array();
+  const CHARSET = 'iso-8859-1';
+  protected static $_mode = null;
+  protected static $_params = array();
   /**
    * We only need one instance of this object. So we use the singleton
    * pattern and cache the instance in this variable
@@ -81,7 +79,7 @@ class nz_co_fuzion_omnipay extends CRM_Core_Payment {
    * @var object
    * @static
   */
-  static private $_singleton = null;
+  private static $_singleton = null;
 
   /**
    * Constructor
@@ -90,11 +88,10 @@ class nz_co_fuzion_omnipay extends CRM_Core_Payment {
    *
    * @return void
    */
-  function __construct( $mode, &$paymentProcessor ) {
-
-    $this->_mode             = $mode;
+  function __construct($mode, &$paymentProcessor) {
+    $this->_mode = $mode;
     $this->_paymentProcessor = $paymentProcessor;
-    $this->_processorName    = ts('Omnipay');
+    $this->_processorName = ts('Omnipay');
   }
   /**
    * singleton function used to manage this object
@@ -105,29 +102,26 @@ class nz_co_fuzion_omnipay extends CRM_Core_Payment {
    * @static
    *
    */
-  static function &singleton( $mode, &$paymentProcessor ) {
+  static function &singleton($mode, &$paymentProcessor) {
     $processorName = $paymentProcessor['name'];
-    if (self::$_singleton[$processorName] === null ) {
-      self::$_singleton[$processorName] = new nz_co_fuzion_omnipay( $mode, $paymentProcessor );
+    if (self::$_singleton[$processorName] === null) {
+      self::$_singleton[$processorName] = new nz_co_fuzion_omnipay($mode, $paymentProcessor);
     }
     return self::$_singleton[$processorName];
   }
-
-  function checkConfig( ) {
+  function checkConfig() {
   }
-
-  function setExpressCheckOut( &$params ) {
-    CRM_Core_Error::fatal( ts( 'This function is not implemented' ) );
+  function setExpressCheckOut(&$params) {
+    CRM_Core_Error::fatal(ts('This function is not implemented'));
   }
-  function getExpressCheckoutDetails( $token ) {
-    CRM_Core_Error::fatal( ts( 'This function is not implemented' ) );
+  function getExpressCheckoutDetails($token) {
+    CRM_Core_Error::fatal(ts('This function is not implemented'));
   }
-  function doExpressCheckout( &$params ) {
-    CRM_Core_Error::fatal( ts( 'This function is not implemented' ) );
+  function doExpressCheckout(&$params) {
+    CRM_Core_Error::fatal(ts('This function is not implemented'));
   }
-
-  function doDirectPayment( &$params ) {
-    CRM_Core_Error::fatal( ts( 'This function is not implemented' ) );
+  function doDirectPayment(&$params) {
+    CRM_Core_Error::fatal(ts('This function is not implemented'));
   }
 
   /**
@@ -139,40 +133,36 @@ class nz_co_fuzion_omnipay extends CRM_Core_Payment {
    * @access public
    *
    */
-  function doTransferCheckout( &$params, $component )
-  {
+  function doTransferCheckout(&$params, $component) {
     //doesn't look like these can actually be passed in....
-    $config    = CRM_Core_Config::singleton( );
-    $cancelURL = $this->getCancelURL($component);
-    $url = $config->userFrameworkResourceURL."extern/ipn.php?processor_name=nz.co.fuzion.omnipay";
-        $component = strtolower( $component );
-          $paymentProcessorParams = $this->mapParamstoPaymentProcessorFields( $params,$component );
+    $config = CRM_Core_Config::singleton();
+    //  $cancelURL = $this->getCancelURL($component);
+    $url = $config->userFrameworkResourceURL . "extern/ipn.php?processor_name=nz.co.fuzion.omnipay";
+    $component = strtolower($component);
+    $paymentProcessorParams = $this->mapParamstoPaymentProcessorFields($params, $component);
 
-          // Allow further manipulation of params via custom hooks
-    CRM_Utils_Hook::alterPaymentProcessorParams( $this, $params, $paymentProcessorParams );
-
-    $processorURL = $this->_paymentProcessor['url_site'] ."?". $this->buildPaymentProcessorString($paymentProcessorParams);
-    CRM_Utils_System::redirect( $processorURL) ;
+    // Allow further manipulation of params via custom hooks
+    CRM_Utils_Hook::alterPaymentProcessorParams($this, $params, $paymentProcessorParams);
+    $processorURL = $this->_paymentProcessor['url_site'] . $this->buildPaymentProcessorString($paymentProcessorParams) . '/civi_url_for_api_update';
+    CRM_Utils_System::redirect($processorURL);
   }
+
   /**
   * Get URL which the browser should be returned to if they cancel or are unsuccessful
   * @component string $omponent function is called from
   * @return string $cancelURL Fully qualified return URL
   * @todo Ideally this would be in the parent payment class
   */
-  function getCancelURL($component){
-    $component = strtolower( $component );
-    if ( $component != 'contribute' && $component != 'event' ) {
-      CRM_Core_Error::fatal( ts( 'Component is invalid' ) );
+  function getCancelURL($component) {
+    $component = strtolower($component);
+    if ($component != 'contribute' && $component != 'event') {
+      CRM_Core_Error::fatal(ts('Component is invalid'));
     }
-    if ( $component == 'event') {
-      $cancelURL = CRM_Utils_System::url( 'civicrm/event/register',
-      "_qf_Confirm_display=true&qfKey={$params['qfKey']}",
-      false, null, false );
-    } else if ( $component == 'contribute' ) {
-            $cancelURL = CRM_Utils_System::url( 'civicrm/contribute/transact',
-              "_qf_Confirm_display=true&qfKey={$params['qfKey']}",
-              false, null, false );
+    if ($component == 'event') {
+      $cancelURL = CRM_Utils_System::url('civicrm/event/register', "_qf_Confirm_display=true&qfKey={$params['qfKey']}", false, null, false);
+    }
+    else if ($component == 'contribute') {
+      $cancelURL = CRM_Utils_System::url('civicrm/contribute/transact', "_qf_Confirm_display=true&qfKey={$params['qfKey']}", false, null, false);
     }
     return $cancelURL;
   }
@@ -182,11 +172,11 @@ class nz_co_fuzion_omnipay extends CRM_Core_Payment {
   * @param array $params
   * @return array $processorParams array reflecting parameters required for payment processor
   */
-  function mapParamstoPaymentProcessorFields($params,$component){
+  function mapParamstoPaymentProcessorFields($params, $component) {
     $processorParams = array(
-      'contact_id' =>  $params['contactID'],
+      'contact_id' => $params['contactID'],
       'contribution_id' => $params['contributionID'],
-      'amount' => $params['total_amount']
+      'amount' => $params['amount']
     );
     return $processorParams;
   }
@@ -197,9 +187,8 @@ class nz_co_fuzion_omnipay extends CRM_Core_Payment {
   * @params array $paymentProcessorParams
   * @return string $paymentProcessorString
   */
-
-  function buildPaymentProcessorString($paymentProcessorParams){
-    $paymentProcessorString = implode('/',$validParams);
+  function buildPaymentProcessorString($paymentProcessorParams) {
+    $paymentProcessorString = implode('/', $paymentProcessorParams);
     return $paymentProcessorString;
- }
+  }
 }
