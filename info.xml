@@ -28,7 +28,7 @@
     <urlSiteDefault>https://omngateway.net/authorize</urlSiteDefault>
     <urlApiDefault></urlApiDefault>
     <urlRecurDefault></urlRecurDefault>
-    <urlSiteTestDefault>https://omngateway.net/authorize</urlSiteTestDefault>
+    <urlSiteTestDefault>app.omngateway.omnipay://omngateway/</urlSiteTestDefault>
     <urlApiTestDefault>/</urlApiTestDefault>
     <urlRecurTestDefault></urlRecurTestDefault>
     <urlButtonDefault></urlButtonDefault>
