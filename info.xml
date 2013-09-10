@@ -25,7 +25,7 @@
     <passwordLabel>password</passwordLabel>
     <signatureLabel></signatureLabel>
     <subjectLabel></subjectLabel>
-    <urlSiteDefault>https://omngateway.net/authorize</urlSiteDefault>
+    <urlSiteDefault>app.omngateway.omnipay://omngateway/</urlSiteDefault>
     <urlApiDefault></urlApiDefault>
     <urlRecurDefault></urlRecurDefault>
     <urlSiteTestDefault>app.omngateway.omnipay://omngateway/</urlSiteTestDefault>
