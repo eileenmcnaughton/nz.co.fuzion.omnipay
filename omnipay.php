@@ -70,7 +70,7 @@ function omnipay_civicrm_managed(&$entities) {
 }
 class nz_co_fuzion_omnipay extends CRM_Core_Payment {
   const CHARSET = 'iso-8859-1';
-  protected static $_mode = null;
+  protected $_mode = null;
   protected static $_params = array();
   /**
    * We only need one instance of this object. So we use the singleton
@@ -97,12 +97,13 @@ class nz_co_fuzion_omnipay extends CRM_Core_Payment {
    * singleton function used to manage this object
    *
    * @param string $mode the mode of operation: live or test
+   * @param $paymentProcessor
+   * @param null $paymentForm
+   * @param bool $force
    *
    * @return object
-   * @static
-   *
    */
-  static function &singleton($mode, &$paymentProcessor) {
+  static function &singleton($mode, &$paymentProcessor, &$paymentForm = NULL, $force = false) {
     $processorName = $paymentProcessor['name'];
     if (self::$_singleton[$processorName] === null) {
       self::$_singleton[$processorName] = new nz_co_fuzion_omnipay($mode, $paymentProcessor);
