@@ -144,7 +144,7 @@ class nz_co_fuzion_omnipay extends CRM_Core_Payment {
 
     // Allow further manipulation of params via custom hooks
     CRM_Utils_Hook::alterPaymentProcessorParams($this, $params, $paymentProcessorParams);
-    $processorURL = $this->_paymentProcessor['url_site'] . $this->buildPaymentProcessorString($paymentProcessorParams) . '/civi_url_for_api_update';
+    $processorURL = $this->_paymentProcessor['url_site'] . $this->buildPaymentProcessorString($paymentProcessorParams);
     CRM_Utils_System::redirect($processorURL);
   }
 
@@ -173,11 +173,13 @@ class nz_co_fuzion_omnipay extends CRM_Core_Payment {
   * @param array $params
   * @return array $processorParams array reflecting parameters required for payment processor
   */
-  function mapParamstoPaymentProcessorFields($params, $component) {
+  function mapParamstoPaymentProcessorFields($params, $component) {;
     $processorParams = array(
-      'contact_id' => $params['contactID'],
+      'amount' => $params['amount'] * 100,
       'contribution_id' => $params['contributionID'],
-      'amount' => $params['amount']
+      'contact_id' => $params['contactID'],
+      'invoice_id' => $params['invoiceID'],
+      'payment_processor_id' => $params['payment_processor_id']
     );
     return $processorParams;
   }
@@ -189,7 +191,28 @@ class nz_co_fuzion_omnipay extends CRM_Core_Payment {
   * @return string $paymentProcessorString
   */
   function buildPaymentProcessorString($paymentProcessorParams) {
-    $paymentProcessorString = implode('/', $paymentProcessorParams);
+    $paymentProcessorString = '/' . implode('/', $paymentProcessorParams) . '/';
+    $paymentProcessorString .= CRM_Utils_System::url('civicrm/payment/ipn', 'processor_name=nz_co_fuzion_omnipay', TRUE, null, FALSE);
     return $paymentProcessorString;
+  }
+
+  /**
+   * handle response from payment processor
+   */
+  function handlePaymentNotification(){
+    $store = NULL;
+    $params = array(
+      'id' => CRM_Utils_Request::retrieve('contribution_id', 'Integer', $store, TRUE),
+      'trxn_id' => CRM_Utils_Request::retrieve('transactionNo', 'String', $store, TRUE),
+      'processor_id' => CRM_Utils_Request::retrieve('processor_id', 'Integer', $store, TRUE),
+      'invoice_id' => CRM_Utils_Request::retrieve('invoice_id', 'String', $store, TRUE),
+    );
+    try{
+      civicrm_api3('contribution', 'completetransaction', $params);
+    }
+    catch (CiviCRM_API3_Exception $e) {
+      CRM_Core_Error::debug_log_message('error completing transaction' . $e->getMessage());
+      CRM_Core_Error::debug_var('payment notification request', $_REQUEST);
+    }
   }
 }
